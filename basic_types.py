@@ -27,10 +27,9 @@ class Ride(object):
 
         # Nominal value of ride (no bonus)
         self.nom_val = distance(self.start, self.end)
-        self.max_val = distance(self.start, self.end)
 
     def __repr__(self):
-        msg =  "[{}]\n".format(self.id)
+        msg =  "{})\n".format(self.id)
         msg += "  * start: {}\n".format(self.start)
         msg += "  * end: {}\n".format(self.end)
         msg += "  * t_start: {}\n".format(self.t_start)

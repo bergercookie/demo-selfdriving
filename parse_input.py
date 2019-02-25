@@ -22,11 +22,12 @@ def parse_input(f_in: str):
     # Get rest of items - N Rides
     for line in range(1, prob.N + 1):
         c = conts[line]
+        _id = line - 1
         line += 1
         start = Point(c[0], c[1])
         end = Point(c[2], c[3])
         t_start, t_end = c[4], c[5]
-        prob.rides.append(Ride(start, end, t_start, t_end, line-1))
+        prob.rides.append(Ride(start, end, t_start, t_end, _id))
 
     # Print stuff out
     print_ssec("Inputs: ")

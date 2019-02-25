@@ -20,28 +20,28 @@ def parse_input(f_in: str):
     prob.R, prob.C, prob.F, prob.N, prob.B, prob.T = conts[0]
 
     # Get rest of items - N Rides
-    line = 1
     for line in range(1, prob.N + 1):
         c = conts[line]
         line += 1
-
         start = Point(c[0], c[1])
         end = Point(c[2], c[3])
         t_start, t_end = c[4], c[5]
-        prob.rides.append(Ride(start, end, t_start, t_end))
+        prob.rides.append(Ride(start, end, t_start, t_end, line-1))
 
     # Print stuff out
     print_ssec("Inputs: ")
-    print("R: ", prob.R)
-    print("C: ", prob.C)
-    print("F: ", prob.F)
-    print("N: ", prob.N)
-    print("B: ", prob.B)
-    print("T: ", prob.T)
+    print("* R: {} rows".format(prob.R))
+    print("* C: {} columns".format(prob.C))
+    print("* F: {} vehicles/fleet".format(prob.F))
+    print("* N: {} rides".format(prob.N))
+    print("* B: {} bonus".format(prob.B))
+    print("* T: {} simulation steps/turns".format(prob.T))
+    print()
     # print_("R: {}| C: {}| F: {}| N: {}| B: {}| T: {}".format(
     #     prob.R, prob.C, prob.F, prob.N, prob.B, prob.T
     # ))
 
     print("rides:\n", prob.rides)
     print_("parsed input successfully")
+    return prob
 

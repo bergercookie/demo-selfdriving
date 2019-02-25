@@ -1,8 +1,9 @@
 # Contains the basic types for the HashCode Problem
 from utils import print_
+import numpy as np
 
 class Point(object):
-    def __init__(self, r=-1, c=-1):
+    def __init__(self, r=0, c=0):
         self.r = r
         self.c = c
 
@@ -11,15 +12,26 @@ class Point(object):
         return msg
 
 
+def distance(p1, p2):
+    return (np.abs(p1.r - p2.r) + np.abs(p1.c - p2.c))
+
+
 class Ride(object):
-    def __init__(self, start, end, t_start, t_end):
+    def __init__(self, start=Point(), end=Point(),
+                 t_start=-1, t_end=-1, _id=-1):
+        self.id = _id
         self.start = start
         self.end = end
         self.t_start = t_start
         self.t_end = t_end
 
+        # Nominal value of ride (no bonus)
+        self.nom_val = distance(self.start, self.end)
+        self.max_val = distance(self.start, self.end)
+
     def __repr__(self):
-        msg =  "* start: {}\n".format(self.start)
+        msg =  "[{}]\n".format(self.id)
+        msg += "  * start: {}\n".format(self.start)
         msg += "  * end: {}\n".format(self.end)
         msg += "  * t_start: {}\n".format(self.t_start)
         msg += "  * t_end: {}\n\n".format(self.t_end)
@@ -42,4 +54,16 @@ class Problem:
 
         self.rides = []
 
-    # TODO - Add viewers to the data
+        # index is the CAR ID, contains the rides for each car
+        # Example
+        # [[0, ],
+        # [[2, 1]]
+        # self.assigns = [[Ride(Point(), Point(), 0, 0, 0), ],
+        #                 [Ride(Point(), Point(), 0, 0, 2),
+        #                  Ride(Point(), Point(), 0, 0, 1)], ]
+        self.assigns = []
+        self.curr_positions = []
+
+    def kickstart(self):
+        self.curr_positions = [Point() for i in range(self.F)]
+        self.assigns = [Ride() for i in range(self.F)]

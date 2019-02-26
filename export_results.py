@@ -6,7 +6,6 @@ def export_results(prob: Problem, outfile: str):
     """Export the results to the file specified."""
 
     print_ssec("Exporting results to {}".format(outfile))
-
     out_lines = []
     for a in prob.assigns:
         with open(outfile, 'w') as f_out:

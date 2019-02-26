@@ -65,4 +65,4 @@ class Problem:
 
     def kickstart(self):
         self.curr_positions = {i: Point() for i in range(self.F)}
-        self.assigns = [Ride() for i in range(self.F)]
+        self.assigns = []

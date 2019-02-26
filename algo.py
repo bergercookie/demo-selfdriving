@@ -16,17 +16,31 @@ import operator
 def compute_distances(prob: Problem, veh_ids, rides, t):
     positions = {i: pos for i, pos in prob.curr_positions.items()
                  if i in veh_ids}
-    # import pdb; pdb.set_trace()
+    dists = {veh: {ride_id: None for ride_id in rides.keys()}
+             for veh in veh_ids}
 
-    dists = {veh: {ride: Ride() for ride in range(len(rides.keys()))} for veh in veh_ids}
-    for veh_id in veh_ids:
+    if t == 0:
+        veh_id = list(veh_ids)[0]
+        dists_single_ride = {}
         for ride in rides.values():
             arrival_time = distance(positions[veh_id], ride.start)
             wait_time = np.max(ride.t_start - (t + arrival_time), 0)
             trip_time = ride.nom_val
 
             t_trip_finish = arrival_time + wait_time + trip_time
-            dists[veh_id][ride.id] = t_trip_finish
+            dists_single_ride[ride.id] = t_trip_finish
+
+        for veh_id in dists.keys():
+            dists[veh_id] = dists_single_ride
+    else:
+        for veh_id in veh_ids:
+            for ride in rides.values():
+                arrival_time = distance(positions[veh_id], ride.start)
+                wait_time = np.max(ride.t_start - (t + arrival_time), 0)
+                trip_time = ride.nom_val
+
+                t_trip_finish = arrival_time + wait_time + trip_time
+                dists[veh_id][ride.id] = t_trip_finish
 
     return dists
 
@@ -45,9 +59,7 @@ def assign(prob: Problem, veh_ids, rides, t):
     for veh_id in veh_ids:
         veh_rides = curr_dists[veh_id]
         veh_rides_sorted = dict(sorted(veh_rides.items(),
-                                  key=operator.itemgetter(1)))
-        # import pdb; pdb.set_trace()
-
+                                       key=operator.itemgetter(1)))
         for ride_id, dist in veh_rides_sorted.items():
             if ride_id not in rideids_assigned:
                 rideids_assigned.add(ride_id)
@@ -86,8 +98,8 @@ def main():
     print_("compuations done.")
 
     # Export results
-    # outfile = "{}_{}".format(int(time.time()), fname)
-    # export_results(prob, outfile)
+    outfile = "{}_{}".format(int(time.time()), fname)
+    export_results(prob, outfile)
 
     print_("all done, exiting.")
 

@@ -61,8 +61,8 @@ class Problem:
         #                 [Ride(Point(), Point(), 0, 0, 2),
         #                  Ride(Point(), Point(), 0, 0, 1)], ]
         self.assigns = []
-        self.curr_positions = []
+        self.curr_positions = {}
 
     def kickstart(self):
-        self.curr_positions = [Point() for i in range(self.F)]
+        self.curr_positions = {i: Point() for i in range(self.F)}
         self.assigns = [Ride() for i in range(self.F)]

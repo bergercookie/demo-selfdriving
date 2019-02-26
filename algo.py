@@ -13,8 +13,8 @@ import operator
 
 # Main body of the hashcode algorithm
 
-def compute_distances(prob: Problem, veh_ids, rides, t):
-    positions = {i: pos for i, pos in prob.curr_positions.items()
+def compute_distances(curr_positions, veh_ids, rides, t):
+    positions = {i: pos for i, pos in curr_positions.items()
                  if i in veh_ids}
     dists = {veh: {ride_id: None for ride_id in rides.keys()}
              for veh in veh_ids}
@@ -46,10 +46,10 @@ def compute_distances(prob: Problem, veh_ids, rides, t):
 
 
 # distance: (veh_id, ride_id)
-def assign(prob: Problem, veh_ids, rides, t):
+def assign(curr_positions, veh_ids, rides, t):
     """Returns [(id pairs)], [distances]."""
-    curr_dists = compute_distances(prob, veh_ids, rides, t)
-    print("curr_dists: ", curr_dists)
+    curr_dists = compute_distances(curr_positions, veh_ids, rides, t)
+    # print("curr_dists: ", curr_dists)
     rideids_assigned = set()
 
     # out_dists = [0 for i in range(veh_ids)]
@@ -67,7 +67,7 @@ def assign(prob: Problem, veh_ids, rides, t):
                 out_ids.append((veh_id, ride_id))
                 break
 
-    return out_ids, out_dists
+    return out_dists, out_ids
 
 
 def main():

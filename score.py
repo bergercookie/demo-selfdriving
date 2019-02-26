@@ -5,6 +5,8 @@ import argparse
 from parse_input import parse_input
 from basic_types import Ride
 from basic_types import distance
+from algo import compute_distances
+from algo import assign
 
 import numpy as np
 
@@ -20,66 +22,73 @@ def parse_output(self, filename):
 
 
 def run(self):
-    self.is_completed = np.zeros((self.N,), dtype=bool)
-    self.curr_rides = [None for i in range(self.F)]
-    self.launch_times = [None for i in range(self.F)]
-    for current_time in range(self.T):
-        # -----------------------------------------------------------------------------
-        # Assignment: launching all cars to the next ride
-        for f in range(self.F):
-            # XXX: Write assignment algorithm here!
+    rides_remaining = {ride.id: ride for ride in self.rides}
 
-            assigns = self.assigns[f]
-            for assign in assigns:
-                if self.is_completed[assign.id]:
-                    continue
+    self.score = 0
 
-                ride = self.rides[assign.id]
+    # tasks: [(car_id, ride_id), ...]
+    car_ids = list(range(self.F))
+    positions = {car_id: self.curr_positions[car_id] for car_id in car_ids}
+    distances, tasks = assign(positions, car_ids, rides_remaining, 0)
 
-                curr_ride = self.curr_rides[f]
+    import heapq
 
-                # check if already assigned or not
-                if curr_ride is None or self.is_completed[curr_ride.id]:
-                    self.curr_rides[f] = ride            # next job
-                    self.launch_times[f] = current_time  # launch to go to the starting point
-        # -----------------------------------------------------------------------------
+    heap = []
+    for i in range(len(distances)):
+        heapq.heappush(heap, (distances[i], tasks[i]))
+        rides_remaining.pop(tasks[i][1])
 
-        # -----------------------------------------------------------------------------
-        # Run one step
-        for f in range(self.F):
-            curr_ride = self.curr_rides[f]
-            launch_time = self.launch_times[f]
-            # to get to the start point of the ride
-            required_time = distance(curr_ride.start, self.curr_positions[f])
+    import tqdm
+    pbar = tqdm.tqdm(total=len(rides_remaining))
 
-            is_arrived = (current_time - launch_time) >= required_time
+    while heap:
+        ending_list = []
+        task_list = []
 
-            # if arrived, curr_positions is updated
-            if is_arrived:
-                self.curr_positions[f] = curr_ride.start
+        ending, task = heapq.heappop(heap)
+        ending_list.append(ending)
+        task_list.append(task)
+        while heap and heap[0][0] == ending:
+            ending, task = heapq.heappop(heap)
+            ending_list.append(ending)
+            task_list.append(task)
 
-            is_completed = (current_time - launch_time) >= (required_time + curr_ride.nom_val)
+        for ending, task in zip(ending_list, task_list):
+            car_id, ride_id = task
+            ride = self.rides[ride_id]
 
-            # if completed, curr_positions is updated
-            if is_completed:
-                self.is_completed[next_ride.id] = True
-                self.curr_positions[f] = curr_ride.end
-        # -----------------------------------------------------------------------------
+            self.curr_positions[car_id] = ride.end
+
+            if ending < ride.t_end:
+                self.score += ride.nom_val
+
+            if (ending - ride.nom_val) == ride.t_start:
+                self.score += self.B
+
+            if len(rides_remaining) > 0:
+                positions = {car_id: self.curr_positions[car_id]}
+                distance, task = assign(
+                    positions, [car_id], rides_remaining, ending)
+                heapq.heappush(heap, (distance[0], task[0]))
+                rides_remaining.pop(task[0][1])
+
+        pbar.update(n=len(self.rides) - len(rides_remaining) - pbar.n)
+
+    return self.score
 
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
-# parser.add_argument('input_file')
-# parser.add_argument('output_file')
 args = parser.parse_args()
 
-args.input_file = 'data/a_example.in'
-args.output_file = 'data/a_example.out'
+# args.input_file = 'data/a_example.in'
+# args.input_file = 'data/b_should_be_easy.in'
+args.input_file = 'data/c_no_hurry.in'
 
 prob = parse_input(args.input_file)
+prob.kickstart()
 print(prob)
 
-parse_output(prob, args.output_file)
-
-run(prob)
+score = run(prob)
+print(score)
